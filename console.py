@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """ Console Module """
+import re
 import cmd
 import sys
 from models.base_model import BaseModel
@@ -115,13 +116,34 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
+        param_list = args.split()
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+        elif param_list[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+        new_instance = HBNBCommand.classes[param_list[0]]()
+
+        for param in param_list:
+            regex = re.compile(
+                r'\w+=("[-(\w)]+"$|' +
+                r'("(\\\")*\w+(\\\")*[^"]\w+(\\\")*"$)|' +
+                r'((-)?\d+(\.\d+)?$))'
+            )
+            if re.match(regex, param):
+                try:
+                    int(param.split('=')[1])
+                    setattr(new_instance, param.split('=')[0],
+                            int(param.split('=')[1]))
+                except Exception:
+                    try:
+                        float(param.split('=')[1])
+                        setattr(new_instance, param.split('=')[0],
+                                float(param.split('=')[1]))
+                    except Exception:
+                        setattr(new_instance, param.split('=')[0],
+                                param.split('=')[1][1:-1].replace('_', ' '))
         storage.save()
         print(new_instance.id)
         storage.save()
