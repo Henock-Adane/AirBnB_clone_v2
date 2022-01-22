@@ -2,3 +2,4 @@ __pycache__/
 file.json
 .print.py
 test_params_create
+main_delete.py
