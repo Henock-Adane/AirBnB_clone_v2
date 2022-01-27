@@ -129,7 +129,7 @@ class HBNBCommand(cmd.Cmd):
         for param in param_list:
             regex = re.compile(
                 r'\w+=("[-(\w)]+"$|' +
-                r'("(\\\")*\w+(\\\")*[^"]\w+(\\\")*"$)|' +
+                r'("(\\\")*\w+(\\\")*[^"]+\w+(\\\")*"$)|' +
                 r'((-)?\d+(\.\d+)?$))'
             )
             if re.match(regex, param):
