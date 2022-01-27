@@ -65,7 +65,7 @@ class DBStorage:
             from models.review import Review
             from models.state import State
             from models.user import User
-            for clss in [City, State, User]:
+            for clss in [City, State, Place, User]:
                 for obj in self.__session.query(clss).all():
                     dictionary[type(obj).__name__ + '.' + obj.id] = obj
         return dictionary

@@ -10,9 +10,11 @@ class State(BaseModel, Base):
     """ State class """
 
     __tablename__ = "states"
-    name = Column(String(128), nullable=False)
 
-    cities = relationship('state', backref="cities")
+    name = Column(String(128), nullable=False)
+    cities = relationship('City',
+                          backref="cities",
+                          cascade="all, delete, delete-orphan")
 
     @property
     def cities(self):
@@ -26,7 +28,7 @@ class State(BaseModel, Base):
         """
         req_cities = []
         from models import storage
-        for k, v in storage.all():
+        for *_, v in storage.all():
             if v.__class__.__name__ == "City" and v.state_id == self.id:
                 req_cities.append(v)
         return req_cities
