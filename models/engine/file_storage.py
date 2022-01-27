@@ -60,7 +60,7 @@ class FileStorage:
         """Delete obj from __objects if found inside.
 
         Args:
-            self (object): <class 'main.HBNBCommand'> type object
+        self (object): <class 'main.HBNBCommand'> type object
             obj (object): <class 'BaseModel'> type object
 
         Returns:
@@ -68,5 +68,5 @@ class FileStorage:
         """
         if obj:
             key = obj.__class__.__name__ + "." + obj.id
-            self.__class__.__objects.pop(key)
+            self.__class__.__objects.pop(key, None)
         return None

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """ Console Module """
+from os import getenv
 import re
 import cmd
 import sys
@@ -144,9 +145,8 @@ class HBNBCommand(cmd.Cmd):
                     except Exception:
                         setattr(new_instance, param.split('=')[0],
                                 param.split('=')[1][1:-1].replace('_', ' '))
-        storage.save()
+        new_instance.save()
         print(new_instance.id)
-        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
@@ -219,23 +219,35 @@ class HBNBCommand(cmd.Cmd):
         print("Destroys an individual instance of a class")
         print("[Usage]: destroy <className> <objectId>\n")
 
-    def do_all(self, args):
-        """ Shows all objects, or all objects of a class"""
-        print_list = []
+    def do_all(self, line):
+        """Print a list of all BaseModel objects as string representation.
 
-        if args:
-            args = args.split(' ')[0]  # remove possible trailing args
-            if args not in HBNBCommand.classes:
+        Responds to `(hbnb) all` as well as `(hbnb) all <instance type>` and
+        returns either a list of all instances created or a specific type's
+        instances list respectively.
+
+        Args:
+            self (object): <class 'main.HBNBCommand'> type object
+            line (str, optional): argument string passed to interpreter
+
+        Returns:
+            None
+        """
+        obj_list = []
+        if line:
+            if (line in HBNBCommand.classes.keys()):
+                for *_, v in storage.all(HBNBCommand.classes[line]).items():
+                    if v.__class__.__name__ == line:
+                        obj_list.append(str(v))
+                print(obj_list)
+            else:
                 print("** class doesn't exist **")
-                return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            for *_, v in storage.all().items():
+                obj_list.append(str(v))
+            print(obj_list)
 
-        print(print_list)
+        return None
 
     def help_all(self):
         """ Help information for the all command """
