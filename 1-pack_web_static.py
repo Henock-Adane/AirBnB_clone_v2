@@ -4,8 +4,11 @@ from fabric.api import local
 
 
 def do_pack():
-    """Pack `web_static` directory to .tgz inside versions."""
+    """Pack `web_static` directory to .tgz inside versions.
 
+    Returns:
+        path of archive <class 'str'>, None <class 'NoneType'>
+    """
     try:
         timestamp = local("date +%Y%m%d%H%M%S", capture=True)
         local("mkdir -p versions;", capture=True)
@@ -15,4 +18,4 @@ def do_pack():
         )
         return 'versions/{}'.format(timestamp)
     except Exception:
-        pass
+        return None

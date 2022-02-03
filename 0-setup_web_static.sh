@@ -10,11 +10,11 @@
 # Configure Nginx to serve content in symlink `current` when request directory is /hbnb_static/
 
 if ! which nginx > /dev/null; then
-	sudo apt update;  sudo apt install nginx -y
+	apt update;  apt install nginx -y
 fi
 
-sudo mkdir -p /data/web_static/shared
-sudo mkdir -p /data/web_static/releases /data/web_static/releases/test
+mkdir -p /data/web_static/shared
+mkdir -p /data/web_static/releases /data/web_static/releases/test
 
 echo "<html>
   <head>
@@ -22,14 +22,14 @@ echo "<html>
   <body>
     Holberton School
   </body>
-</html>" | sudo tee /data/web_static/releases/test/index.html
+</html>" | tee /data/web_static/releases/test/index.html
 
-sudo ln -sf /data/web_static/releases/test /data/web_static/current;
+ln -sf /data/web_static/releases/test /data/web_static/current;
 
-sudo chown -Rh ubuntu:ubuntu /data
+chown -Rh ubuntu:ubuntu /data
 
 if ! grep -q "/hbnb_static" /etc/nginx/sites-available/default; then
-	sudo sed -i "s/\tlocation \/ {/\tlocation \/hbnb_static\/ {\n\t\talias \/data\/web_static\/current\/;\n\t\ttry_files \$uri \$uri\/index.html \$uri\/ =404;\n\t}\n\n\tlocation \/ {/" /etc/nginx/sites-available/default
+	sed -i "s/\tlocation \/ {/\tlocation \/hbnb_static\/ {\n\t\talias \/data\/web_static\/current\/;\n\t\ttry_files \$uri \$uri\/index.html \$uri\/ =404;\n\t}\n\n\tlocation \/ {/" /etc/nginx/sites-available/default
 fi
 
-sudo service nginx restart
+service nginx restart

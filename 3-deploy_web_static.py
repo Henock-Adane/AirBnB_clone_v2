@@ -1,17 +1,47 @@
 #!/usr/bin/python3
 """Directory deployer fabric module"""
-from fabric.api import run, env, cd, put
+from fabric.api import run, env, cd, put, local, task, execute, hosts
 from os.path import exists
 
-env.user = 'ubuntu'
 env.hosts = [
     '34.73.227.49',
     '35.173.250.239'
 ]
 
 
+@task
+def do_pack():
+    """Pack `web_static` directory to .tgz inside versions.
+
+    Returns:
+        path of archive <class 'str'> or
+        None <class 'NoneType'> upon an exception
+    """
+    try:
+        timestamp = local("date +%Y%m%d%H%M%S", capture=True)
+        archive_name = 'web_static_{}.tgz'.format(timestamp)
+
+        local("mkdir -p versions;")
+        print(
+            'Packing web_static to /versions/{}'
+            .format(timestamp)
+        )
+        local(
+            "tar -cvzf versions/{} web_static"
+            .format(archive_name)
+        )
+        print(
+            '`{}` archive successfully created!'
+            .format(archive_name)
+        )
+        return 'versions/{}'.format(archive_name)
+    except Exception:
+        return None
+
+
+@task
 def do_deploy(archive_path):
-    """Distribute .tgz archive to web servers.
+    """Deploy .tgz archive to web servers.
 
     Args:
         archive_path (str): Path to archive to send.
@@ -51,7 +81,7 @@ def do_deploy(archive_path):
                 )
             )
             run(
-                'mv {1}/{2}/web_static/* {1}/{2}/'.format(
+                'mv {0}/{1}/web_static/* {0}/{1}/'.format(
                     remote_releases_path,
                     remote_dump_dir,
                 )
@@ -71,7 +101,27 @@ def do_deploy(archive_path):
                     remote_dump_dir
                 )
             )
+            print('New version deployed!')
         except Exception:
             return False
         return True
+    return False
+
+
+@task
+@hosts('34.73.227.49')
+def deploy():
+    """Pack and deploy web_static to servers
+
+    Returns:
+        True if all operations are nominal, False otherwise
+    """
+    path = do_pack()
+    if path:
+        deployed = execute(
+            do_deploy,
+            path,
+            hosts=['34.73.227.49', '35.173.250.239']
+        )
+        return deployed['34.73.227.49'] and deployed['35.173.250.239']
     return False
