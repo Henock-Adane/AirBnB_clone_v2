@@ -5,7 +5,7 @@ from os.path import exists
 
 env.user = 'ubuntu'
 env.hosts = [
-    '34.73.227.49',
+    '3.236.77.80',
     '35.173.250.239'
 ]
 
@@ -51,7 +51,7 @@ def do_deploy(archive_path):
                 )
             )
             run(
-                'mv {1}/{2}/web_static/* {1}/{2}/'.format(
+                'mv {0}/{1}/web_static/* {0}/{1}/'.format(
                     remote_releases_path,
                     remote_dump_dir,
                 )

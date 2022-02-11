@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 """Directory deployer fabric module"""
-from fabric.api import run, env, cd, put, local, task, execute, hosts
+from fabric.api import run, env, cd, put, local, task, execute, runs_once
 from os.path import exists
 
 env.hosts = [
-    '34.73.227.49',
+    '3.236.77.80',
     '35.173.250.239'
 ]
 
 
 @task
+@runs_once
 def do_pack():
     """Pack `web_static` directory to .tgz inside versions.
 
@@ -60,26 +61,19 @@ def do_deploy(archive_path):
                 put(archive_path, '{}'.format(archive_name))
 
             run(
-                'mkdir -p {}/{}'
-                .format(
+                'mkdir -p {}/{}'.format(
                     remote_releases_path,
                     remote_dump_dir
                 )
             )
             run(
-                'tar -xzf /tmp/{} -C {}/{}'
-                .format(
+                'tar -xzf /tmp/{} -C {}/{}'.format(
                     archive_name,
                     remote_releases_path,
                     remote_dump_dir
                 )
             )
-            run(
-                'rm -rf /tmp/{}'
-                .format(
-                    archive_name,
-                )
-            )
+            run('rm -rf /tmp/{}'.format(archive_name))
             run(
                 'mv {0}/{1}/web_static/* {0}/{1}/'.format(
                     remote_releases_path,
@@ -87,16 +81,14 @@ def do_deploy(archive_path):
                 )
             )
             run(
-                'rm -rf {}/{}/web_static'
-                .format(
+                'rm -rf {}/{}/web_static'.format(
                     remote_releases_path,
                     remote_dump_dir
                 )
             )
             run('rm -rf /data/web_static/current')
             run(
-                'ln -s {}/{} /data/web_static/current'
-                .format(
+                'ln -s {}/{} /data/web_static/current'.format(
                     remote_releases_path,
                     remote_dump_dir
                 )
@@ -109,7 +101,6 @@ def do_deploy(archive_path):
 
 
 @task
-@hosts('34.73.227.49')
 def deploy():
     """Pack and deploy web_static to servers
 
@@ -118,10 +109,5 @@ def deploy():
     """
     path = do_pack()
     if path:
-        deployed = execute(
-            do_deploy,
-            path,
-            hosts=['34.73.227.49', '35.173.250.239']
-        )
-        return deployed['34.73.227.49'] and deployed['35.173.250.239']
+        return do_deploy(path)
     return False
