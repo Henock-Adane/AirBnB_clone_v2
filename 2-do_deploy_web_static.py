@@ -5,8 +5,8 @@ from os.path import exists
 
 env.user = 'ubuntu'
 env.hosts = [
-    '3.236.77.80',
-    '35.173.250.239'
+    '3.230.152.170',
+    '34.138.18.45'
 ]
 
 
