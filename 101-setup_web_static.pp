@@ -1,28 +1,65 @@
-# puppet manifest preparing a server for static content deployment
+# update packages
 exec { 'apt-get-update':
-  command => '/usr/bin/env apt-get -y update',
+  command  => 'sudo apt-get -y update',
+  provider => shell,
 }
--> exec {'b':
-  command => '/usr/bin/env apt-get -y install nginx',
+
+# install nginx
+exec {'install nginx':
+  command  => 'sudo apt-get -y install nginx',
+  provider => shell,
 }
--> exec {'c':
-  command => '/usr/bin/env mkdir -p /data/web_static/releases/test/',
+
+# allow HTTP in Nginx
+# exec {'allow HTTP':
+#  command  => "sudo ufw allow 'Nginx HTTP'",
+#  provider => shell,
+# }
+
+# create the path /data/web_static/releases/test/
+exec {'mkdir /test':
+  command  => 'sudo mkdir -p /data/web_static/releases/test/',
+  provider => shell,
 }
--> exec {'d':
-  command => '/usr/bin/env mkdir -p /data/web_static/shared/',
+
+# create the path /data/web_static/shared/
+exec {'mkdir /shared':
+  command  => 'sudo mkdir -p /data/web_static/shared/',
+  provider => shell,
 }
--> exec {'e':
-  command => '/usr/bin/env echo "Puppet x Hello World!" > /data/web_static/releases/test/index.html',
+
+# create test inex file with temporary content
+exec {'create index.html':
+  command  => 'echo "Set by puppet manifest of task 5 from project 0X03 AirBnB" > /data/web_static/releases/test/index.html',
+  provider => shell,
 }
--> exec {'f':
-  command => '/usr/bin/env ln -sf /data/web_static/releases/test /data/web_static/current',
+
+# change owner of folder /date recursively
+exec {'chown-data':
+  command  => 'sudo chown -hR ubuntu:ubuntu /data; sudo chown -hR ubuntu:ubuntu /data/web_static/',
+  provider => shell,
 }
--> exec {'h':
-  command => '/usr/bin/env sed -i "/listen 80 default_server/a location /hbnb_static/ { alias /data/web_static/current/;}" /etc/nginx/sites-available/default',
+
+# link /current to /test
+exec {'link /current ot /test':
+  command  => 'sudo ln -sf /data/web_static/releases/test /data/web_static/current',
+  provider => shell,
 }
--> exec {'i':
-  command => '/usr/bin/env service nginx restart',
+
+# add /hbnb_static location to nginx config
+exec {'add new location /hbnb_static':
+  command  => 'sudo sed -i "38i\ \\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n" /etc/nginx/sites-available/default',
+  provider => shell,
 }
--> exec {'g':
-  command => '/usr/bin/env chown -R ubuntu:ubuntu /data',
+
+# link sites-enabled/default to sites-available/default
+exec {'link sites enabled to available':
+  command  => 'sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default',
+  provider => shell,
+}
+
+# restart Nginx service
+exec {'restart nginx':
+  command  => 'sudo service nginx restart',
+  provider => shell,
 }

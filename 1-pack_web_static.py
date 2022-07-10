@@ -1,21 +1,22 @@
 #!/usr/bin/python3
-"""Directory packer fabric module"""
+'''Fabric script for task 1 0X03'''
+
 from fabric.api import local
+from datetime import datetime
+
+from fabric.decorators import runs_once
 
 
+@runs_once
 def do_pack():
-    """Pack `web_static` directory to .tgz inside versions.
+    '''generates a .tgz archive from the contents of the web_static folder'''
+    local("mkdir -p versions")
+    path = ("versions/web_static_{}.tgz"
+            .format(datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")))
+    result = local("tar -cvzf {} web_static"
+                   .format(path),
+                   capture=True)
 
-    Returns:
-        path of archive <class 'str'>, None <class 'NoneType'>
-    """
-    try:
-        timestamp = local("date +%Y%m%d%H%M%S", capture=True)
-        local("mkdir -p versions;", capture=True)
-        local(
-            "tar -cvzf versions/web_static_{}.tgz web_static"
-            .format(timestamp)
-        )
-        return 'versions/{}'.format(timestamp)
-    except Exception:
+    if result.failed:
         return None
+    return path

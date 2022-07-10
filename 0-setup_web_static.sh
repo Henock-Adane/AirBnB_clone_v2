@@ -1,35 +1,18 @@
 #!/usr/bin/env bash
-# Sets up a web server for deployment of web_static.
-
-apt-get update
-apt-get install -y nginx
-
-mkdir -p /data/web_static/releases/test/
-mkdir -p /data/web_static/shared/
-echo "Hello World!" > /data/web_static/releases/test/index.html
-ln -sf /data/web_static/releases/test/ /data/web_static/current
-
-chown -R ubuntu /data/
-chgrp -R ubuntu /data/
-
-printf %s "server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    add_header X-Served-By $HOSTNAME;
-    root   /var/www/html;
-    index  index.html index.htm;
-    location /hbnb_static {
-        alias /data/web_static/current;
-        index index.html index.htm;
-    }
-    location /redirect_me {
-        return 301 http://cuberule.com/;
-    }
-    error_page 404 /404.html;
-    location /404 {
-      root /var/www/html;
-      internal;
-    }
-}" > /etc/nginx/sites-available/default
-
-service nginx restart
+# sets up my web servers for the deployment of web_static
+sudo apt -y update
+sudo apt-get -y install nginx
+sudo ufw allow 'Nginx HTTP'
+sudo mkdir -p /data/web_static/releases/test /data/web_static/shared
+echo "<h1>Test Page</h1>" > /data/web_static/releases/test/index.html
+if [ -d "/data/web_static/current" ];
+then
+    echo "path /data/web_static/current exists"
+    sudo rm -rf /data/web_static/current;
+fi;
+sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
+sudo chown -hR ubuntu:ubuntu /data
+#sed -i "/server_name _;/a \\\n\tlocation /hbnb_static { \n\t\talias /data/web_static/current/;\n\t\tautoindex on;\n\t}" /etc/nginx/sites-available/default
+sudo sed -i '38i\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n' /etc/nginx/sites-available/default
+sudo ln -sf '/etc/nginx/sites-available/default' '/etc/nginx/sites-enabled/default'
+sudo service nginx restart
